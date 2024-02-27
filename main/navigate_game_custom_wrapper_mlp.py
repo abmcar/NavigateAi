@@ -122,4 +122,3 @@ class NavigateEnv(gym.Env):
         obs[tuple(self.game.navigator)] = 1.0
         obs[tuple(self.game.destination)] = -1.0
         return obs
-#test

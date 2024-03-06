@@ -6,12 +6,13 @@ from sb3_contrib import MaskablePPO
 from navigate_game_custom_wrapper_mlp import NavigateEnv
 
 MODEL_PATH = r"trained_models_mlp/ppo_navigate_final"
+# MODEL_PATH = r"trained_models_mlp/ppo_navigate_1966080_steps.zip"
 
 NUM_EPISODE = 10
 
 RENDER = True
-FRAME_DELAY = 0.1  # 0.01 fast, 0.05 slow
-ROUND_DELAY = 2
+FRAME_DELAY = 0.01  # 0.01 fast, 0.05 slow
+ROUND_DELAY = 0.5
 
 seed = random.randint(0, 1e9)
 print(f"Using seed = {seed} for testing.")

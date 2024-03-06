@@ -46,7 +46,7 @@ def main():
     while len(seed_set) < NUM_ENV:
         seed_set.add(random.randint(0, 1e9))
 
-    env = make_vec_env(make_env(seed=1), n_envs=16)
+    env = make_vec_env(make_env(1), n_envs=16)
 
     # env = NavigateEnv(seed=114514,silent_mode=False)
     # env = ActionMasker(env, NavigateEnv.get_action_mask)
@@ -58,6 +58,7 @@ def main():
         env,
         # device="mps",
         verbose=1,
+        # gamma=,
         tensorboard_log=LOG_DIR
     )
 
@@ -77,7 +78,8 @@ def main():
 
     model.learn(
         total_timesteps=int(512 * 16) * 200,
-        callback=[checkpoint_callback]
+        callback=[checkpoint_callback],
+        use_masking=False
     )
     env.close()
 

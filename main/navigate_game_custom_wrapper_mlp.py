@@ -33,6 +33,7 @@ class NavigateEnv(gym.Env):
         self.total_step = 0
         self.path = list()
         self.total_reward = 0
+        self.already_achieve = 1
 
     def seed(self, sed):
         # self.game.seed(sed)
@@ -45,52 +46,55 @@ class NavigateEnv(gym.Env):
         self.over_time = False
         self.reward_step_counter = 0
         self.total_step = 0
+        self.path = []
+        self.already_achieve = 0
 
         obs = self._generate_observation()
         # return obs, reward, self.done, self.over_time, info
         return obs, info
 
     def step(self, action):
-        self.done, info = self.game.step(
-            action)
+        self.done, info = self.game.step(action)
         obs = self._generate_observation()
 
         navigator = info["navigator_pos"]
         destination = info["destination_pos"]
 
-        reward = (10 - (abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1]))) * 0.1
+        # 更新距离奖励，使用更敏感的距离衡量方法
+        distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
+        reward = 20 / max(1, distance) / max(1, self.reward_step_counter)  # 奖励与距离负相关
 
+        # 减轻对重复路径的惩罚，允许一定程度的探索
         if navigator in self.path:
-            reward = reward - 64
+            reward -= 10  # 适当减少惩罚
 
         self.path.append(navigator)
-
-        self.reward_step_counter += 1
         self.total_step += 1
 
-        if self.total_step > self.step_limit:  # Step limit reached, game over.
+        # 到达目的地的奖励，奖励与所需步数的倒数平方成正比，同时加入动态因子以鼓励连续成功
+        if info["destination_arrived"]:
+            reward += 1000 + 1000 / max(1, (self.reward_step_counter))
+            self.already_achieve += 1
             self.reward_step_counter = 0
+            self.path = []
+
+        # 处理步数限制导致的游戏结束
+        if self.total_step > self.step_limit:
             self.over_time = True
-            self.done = True
 
-        elif info["destination_arrived"]:
-            # reward = math.exp((self.grid_size - self.reward_step_counter) / self.grid_size)
-            reward = 1024 / self.reward_step_counter
-            self.reward_step_counter = 0
-            self.path = list()
-            if self.total_reward < 0:
-                self.done = True
+        # 如果智能体撞墙或其他结束游戏的条件
         elif self.done:
-            reward = -128
+            # reward -= min(200 * (max(1, self.already_achieve) ** 1.15),
+            #               200 * (1.15 ** max(1, self.already_achieve)))  # 碰撞或其他失败条件导致较大惩罚
+            reward -= 1000
 
-        self.total_reward += reward
         return obs, reward, self.done, self.over_time, info
 
     def render(self):
         self.game.render()
 
     def get_action_mask(self):
-        return np.array([[self._check_action_validity(a) for a in range(self.action_space.n)]])
+        return np.array([[True for a in range(self.action_space.n)]])
 
     # Check if the action is against the current direction of the snake or is ending the game.
     def _check_action_validity(self, action):

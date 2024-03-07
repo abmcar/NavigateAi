@@ -62,7 +62,7 @@ class NavigateEnv(gym.Env):
 
         # 更新距离奖励，使用更敏感的距离衡量方法
         distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
-        reward = 20 / max(1, distance) / max(1, self.reward_step_counter)  # 奖励与距离负相关
+        reward = 20 / max(1, distance)  # 奖励与距离负相关
 
         # 减轻对重复路径的惩罚，允许一定程度的探索
         if navigator in self.path:

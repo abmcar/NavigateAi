@@ -67,7 +67,7 @@ for episode in range(NUM_EPISODE):
             sum_step_reward += reward  # Accumulate step rewards.
 
         episode_reward += reward
-
+    
         if RENDER:
             env.render()
             time.sleep(FRAME_DELAY)

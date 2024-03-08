@@ -62,7 +62,7 @@ class NavigateEnv(gym.Env):
 
         # 更新距离奖励，使用更敏感的距离衡量方法
         distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
-        reward = 20 / max(1, distance)  # 奖励与距离负相关
+        reward = 10 / max(1, distance)  # 奖励与距离负相关
 
         # 减轻对重复路径的惩罚，允许一定程度的探索
         if navigator in self.path:
@@ -70,10 +70,11 @@ class NavigateEnv(gym.Env):
 
         self.path.append(navigator)
         self.total_step += 1
+        self.reward_step_counter += 1
 
         # 到达目的地的奖励，奖励与所需步数的倒数平方成正比，同时加入动态因子以鼓励连续成功
         if info["destination_arrived"]:
-            reward += 1000 + 1000 / max(1, (self.reward_step_counter))
+            reward += 100 + 100 / max(1, self.reward_step_counter) * (self.already_achieve ** 0.5)
             self.already_achieve += 1
             self.reward_step_counter = 0
             self.path = []
@@ -86,7 +87,7 @@ class NavigateEnv(gym.Env):
         elif self.done:
             # reward -= min(200 * (max(1, self.already_achieve) ** 1.15),
             #               200 * (1.15 ** max(1, self.already_achieve)))  # 碰撞或其他失败条件导致较大惩罚
-            reward -= 1000
+            reward -= 1000 - self.total_step
 
         return obs, reward, self.done, self.over_time, info
 
@@ -94,7 +95,7 @@ class NavigateEnv(gym.Env):
         self.game.render()
 
     def get_action_mask(self):
-        return np.array([[True for a in range(self.action_space.n)]])
+        return np.array([[self._check_action_validity(a) for a in range(self.action_space.n)]])
 
     # Check if the action is against the current direction of the snake or is ending the game.
     def _check_action_validity(self, action):

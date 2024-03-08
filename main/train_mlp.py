@@ -77,7 +77,7 @@ def main():
     #     sys.stdout = log_file
 
     model.learn(
-        total_timesteps=int(512 * 16) * 100 ,
+        total_timesteps=int(512 * 16) * 800 ,
         callback=[checkpoint_callback],
         use_masking=False
     )

@@ -20,10 +20,10 @@ class NavigateEnv(gym.Env):
             low=-1, high=1,
             shape=(self.game.board_size, self.game.board_size),
             dtype=np.float32
-        )  # 0: empty, 0.5: snake body, 1: navigator, -1: destination
+        )  # 0: empty,  1: navigator, -1: destination
 
         self.board_size = board_size
-        self.grid_size = board_size ** 2  # Max length of snake is board_size^2
+        self.grid_size = board_size ** 2
 
         self.done = False
         self.over_time = False
@@ -97,7 +97,7 @@ class NavigateEnv(gym.Env):
     def get_action_mask(self):
         return np.array([[self._check_action_validity(a) for a in range(self.action_space.n)]])
 
-    # Check if the action is against the current direction of the snake or is ending the game.
+    # Check if the action is against the current direction of the navigator or is ending the game.
     def _check_action_validity(self, action):
         row, col = self.game.navigator
         if action == 0:  # UP
@@ -121,7 +121,6 @@ class NavigateEnv(gym.Env):
         else:
             return True
 
-    # EMPTY: 0; SnakeBODY: 0.5; SnakeHEAD: 1; FOOD: -1;
     def _generate_observation(self):
         obs = np.zeros((self.game.board_size, self.game.board_size), dtype=np.float32)
         obs[tuple(self.game.navigator)] = 1.0

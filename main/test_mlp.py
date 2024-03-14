@@ -78,7 +78,6 @@ for episode in range(NUM_EPISODE):
     if episode_score > max_score:
         max_score = episode_score
 
-    # snake_size = info["snake_size"] + 1
     print(
         f"Episode {episode + 1}: Reward Sum: {episode_reward:.4f}, Score: {episode_score}, Total Steps: {num_step}")
     total_reward += episode_reward

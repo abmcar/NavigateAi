@@ -20,6 +20,10 @@ class NavigateGame:
         self.display_width = self.width + 2 * self.border_size
         self.display_height = self.height + 2 * self.border_size + 40
 
+        # 0:None 1: UP, 2: DOWN, 3: LEFT, 4: RIGHT
+        self.next_row = (0, -1, 1, 0, 0)
+        self.next_col = (0, 0, 0, -1, 1)
+
         self.silent_mode = silent_mode
         if not silent_mode:
             pygame.init()
@@ -37,7 +41,7 @@ class NavigateGame:
             self.font = None
 
         self.navigator = None
-        self.non_navigator = None
+        self.obstacles = None
 
         self.direction = None
         self.score = 0
@@ -54,95 +58,30 @@ class NavigateGame:
     def reset(self):
         # 初始化开始位置为中心
         self.navigator = (self.board_size // 2, self.board_size // 2)
-        # 其余空余位置
-        self.non_navigator = set([(row, col) for row in range(self.board_size) for col in range(self.board_size) if
-                                  (row, col) != self.navigator])
 
         # 初始方向（下一步要走的方向）
         self.direction = "NONE"
         self.destination = self._generate_destination()
+        self.obstacles = self._generate_obstacles()
         self.score = 0
 
         destination_arrived = (self.navigator == self.destination)
 
         info = {
             "navigator_pos": self.navigator,
-            "destination_pos": np.array(self.destination),
+            "destination_pos": self.destination,
             "destination_arrived": destination_arrived
         }
         return info
 
-    # def step(self, action):
-    #     # 从键盘动作得到下一步的方向
-    #     self._update_direction(action)
-    #
-    #     # 移动 Navigator 位置
-    #     row, col = self.navigator
-    #     if self.direction == "UP":
-    #         row -= 1
-    #     elif self.direction == "DOWN":
-    #         row += 1
-    #     elif self.direction == "LEFT":
-    #         col -= 1
-    #     elif self.direction == "RIGHT":
-    #         col += 1
-    #
-    #     self.direction = "NONE"
-    #
-    #     # 检查是否到达终点
-    #     if (row, col) == self.destination:
-    #         destination_arrived = True
-    #         self.score += 10
-    #         if not self.silent_mode:
-    #             self.sound_eat.play()
-    #     else:
-    #         destination_arrived = False
-    #
-    #     # 检查是否撞墙
-    #     done = (
-    #             row < 0
-    #             or row >= self.board_size
-    #             or col < 0
-    #             or col >= self.board_size
-    #     )
-    #
-    #     if not done:
-    #         self.non_navigator.add(self.navigator)
-    #         self.non_navigator.remove((row, col))
-    #         self.navigator = (row, col)
-    #
-    #     else:
-    #         if not self.silent_mode:
-    #             self.sound_game_over.play()
-    #
-    #     # Add new food after snake movement completes.
-    #     if destination_arrived:
-    #         self.destination = self._generate_destination()
-    #
-    #     info = {
-    #         "navigator_pos": self.navigator,
-    #         "destination_pos": self.destination,
-    #         "destination_arrived": destination_arrived
-    #     }
-    #
-    #     return done, info
-
     def step(self, action):
         # 从键盘动作得到下一步的方向
-        self._update_direction(action)
+        self.direction = action
 
         # 移动 Navigator 位置
         row, col = self.navigator
-        if self.direction == "UP":
-            row -= 1
-        elif self.direction == "DOWN":
-            row += 1
-        elif self.direction == "LEFT":
-            col -= 1
-        elif self.direction == "RIGHT":
-            col += 1
-
-        self.direction = "NONE"
+        row += self.next_row[self.direction]
+        col += self.next_col[self.direction]
 
         # 检查是否撞墙
         done = (
@@ -150,6 +89,7 @@ class NavigateGame:
                 or row >= self.board_size
                 or col < 0
                 or col >= self.board_size
+                or (row, col) in self.obstacles
         )
 
         # 检查是否到达终点
@@ -162,10 +102,7 @@ class NavigateGame:
             destination_arrived = False
 
         if not done:
-            self.non_navigator.add(self.navigator)
-            self.non_navigator.remove((row, col))
             self.navigator = (row, col)
-
         else:
             if not self.silent_mode:
                 self.sound_game_over.play()
@@ -177,33 +114,45 @@ class NavigateGame:
         }
         if destination_arrived:
             self.destination = self._generate_destination()
+            self.obstacles = self._generate_obstacles()
             # done = destination_arrived
             # if self.score >= 100:
             #     done = True
 
         return done, info
 
-    # 0: UP, 1: LEFT, 2: RIGHT, 3: DOWN
-    def _update_direction(self, action):
-        if action == 0:
-            self.direction = "UP"
-        elif action == 1:
-            self.direction = "LEFT"
-        elif action == 2:
-            self.direction = "RIGHT"
-        elif action == 3:
-            self.direction = "DOWN"
+    def _generate_destination(self) -> tuple:
+        row = random.randint(0, self.board_size - 1)
+        col = random.randint(0, self.board_size - 1)
+        while (row, col) == self.navigator:
+            row = random.randint(0, self.board_size - 1)
+            col = random.randint(0, self.board_size - 1)
+        return row, col
 
-    def _generate_destination(self):
-        destination = random.sample(list(self.non_navigator), 1)[0]
-        return destination
+    def _generate_obstacles(self, obstacle_count=None):
+        """
+        随机在游戏板上生成障碍物。
+        可以通过 obstacle_count 参数指定障碍物的数量，
+        如果没有指定，障碍物数量默认为板大小的 1/7。
+        """
+        obstacles = set()
+        if obstacle_count is None:
+            obstacle_count = self.board_size * self.board_size // 7  # 默认障碍物数量
+
+        while len(obstacles) < obstacle_count:
+            row = random.randint(0, self.board_size - 1)
+            col = random.randint(0, self.board_size - 1)
+            pos = (row, col)
+            if pos not in obstacles and pos != self.navigator and pos != self.destination:
+                obstacles.add(pos)
+        return obstacles
 
     def draw_score(self):
         score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
         self.screen.blit(score_text, (self.border_size, self.height + 2 * self.border_size))
 
     def draw_welcome_screen(self):
-        title_text = self.font.render("SNAKE GAME", True, (255, 255, 255))
+        title_text = self.font.render("NAVIGATE GAME", True, (255, 255, 255))
         start_button_text = "START"
 
         self.screen.fill((0, 0, 0))
@@ -259,8 +208,14 @@ class NavigateGame:
         pygame.draw.rect(self.screen, (255, 255, 255),
                          (self.border_size - 2, self.border_size - 2, self.width + 4, self.height + 4), 2)
 
-        # Draw snake
-        self.draw_snake()
+        # Draw navigator
+        self.draw_navigator()
+
+        # Draw obstacles
+        for row, col in self.obstacles:
+            pygame.draw.rect(self.screen, (50, 50, 50), (
+                col * self.cell_size + self.border_size, row * self.cell_size + self.border_size, self.cell_size,
+                self.cell_size))
 
         # Draw destination
         r, c = self.destination
@@ -278,29 +233,38 @@ class NavigateGame:
                 pygame.quit()
                 sys.exit()
 
-    def draw_snake(self):
-        # Draw the head
-        # head_r, head_c = self.snake[0]
-        # head_x = head_c * self.cell_size + self.border_size
-        # head_y = head_r * self.cell_size + self.border_size
+    def draw_navigator(self):
 
         r, c = self.navigator
         x = c * self.cell_size + self.border_size
         y = r * self.cell_size + self.border_size
 
-        # Draw the Navigator (Blue)
-        pygame.draw.polygon(self.screen, (100, 100, 255), [
-            (x + self.cell_size // 2, y),
-            (x + self.cell_size, y + self.cell_size // 2),
-            (x + self.cell_size // 2, y + self.cell_size),
-            (x, y + self.cell_size // 2)
-        ])
+        # 定义颜色
+        body_color = (0, 100, 200)  # 更深的蓝色用于身体
+        eye_color = (255, 255, 255)  # 白色用于眼睛
+        pupil_color = (0, 0, 0)  # 黑色用于瞳孔
 
-        eye_size = 3
-        eye_offset = self.cell_size // 4
-        pygame.draw.circle(self.screen, (255, 255, 255), (x + eye_offset, y + eye_offset), eye_size)
-        pygame.draw.circle(self.screen, (255, 255, 255), (x + self.cell_size - eye_offset, y + eye_offset),
-                           eye_size)
+        # 绘制 Navigator 的身体（圆形）
+        pygame.draw.circle(self.screen, body_color, (x + self.cell_size // 2, y + self.cell_size // 2),
+                           self.cell_size // 2)
+
+        # 绘制眼睛（较大的圆形）
+        eye_radius = self.cell_size // 5
+        left_eye_center = (x + self.cell_size // 3, y + self.cell_size // 3)
+        right_eye_center = (x + 2 * self.cell_size // 3, y + self.cell_size // 3)
+
+        pygame.draw.circle(self.screen, eye_color, left_eye_center, eye_radius)
+        pygame.draw.circle(self.screen, eye_color, right_eye_center, eye_radius)
+
+        # 绘制瞳孔（较小的圆形）
+        pupil_radius = self.cell_size // 10
+        pygame.draw.circle(self.screen, pupil_color, left_eye_center, pupil_radius)
+        pygame.draw.circle(self.screen, pupil_color, right_eye_center, pupil_radius)
+
+        # 绘制嘴巴（一个简单的线或者笑脸）
+        mouth_start = (x + self.cell_size // 3, y + 2 * self.cell_size // 3)
+        mouth_end = (x + 2 * self.cell_size // 3, y + 2 * self.cell_size // 3)
+        pygame.draw.line(self.screen, pupil_color, mouth_start, mouth_end, 2)  # 使用线条绘制简单嘴巴
 
 
 if __name__ == "__main__":
@@ -319,9 +283,9 @@ if __name__ == "__main__":
     start_button = game.font.render("START", True, (0, 0, 0))
     retry_button = game.font.render("RETRY", True, (0, 0, 0))
 
-    update_interval = 0.01
+    update_interval = 0.005
     start_time = time.time()
-    action = -1
+    action = 0
 
     while True:
 
@@ -330,14 +294,16 @@ if __name__ == "__main__":
             if game_state == "running":
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
-                        action = 0
-                    elif event.key == pygame.K_DOWN:
-                        action = 3
-                    elif event.key == pygame.K_LEFT:
                         action = 1
-                    elif event.key == pygame.K_RIGHT:
+                    elif event.key == pygame.K_DOWN:
                         action = 2
-
+                    elif event.key == pygame.K_LEFT:
+                        action = 3
+                    elif event.key == pygame.K_RIGHT:
+                        action = 4
+                    elif event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -349,7 +315,7 @@ if __name__ == "__main__":
                         game.draw_countdown(i)
                         game.sound_eat.play()
                         pygame.time.wait(1000)
-                    action = -1  # Reset action variable when starting a new game
+                    action = 0  # Reset action variable when starting a new game
                     game_state = "running"
 
             if game_state == "game_over" and event.type == pygame.MOUSEBUTTONDOWN:
@@ -360,23 +326,22 @@ if __name__ == "__main__":
                         game.sound_eat.play()
                         pygame.time.wait(1000)
                     game.reset()
-                    action = -1  # Reset action variable when starting a new game
+                    action = 0  # Reset action variable when starting a new game
                     game_state = "running"
+
+            if game_state == "running":
+                done, _ = game.step(action)
+                game.render()
+                start_time = time.time()
+                action = 0
+
+                if done:
+                    game_state = "game_over"
 
         if game_state == "welcome":
             game.draw_welcome_screen()
 
         if game_state == "game_over":
             game.draw_game_over_screen()
-
-        if game_state == "running":
-            if time.time() - start_time >= update_interval:
-                done, _ = game.step(action)
-                game.render()
-                start_time = time.time()
-                action = -1
-
-                if done:
-                    game_state = "game_over"
 
         pygame.time.wait(1)

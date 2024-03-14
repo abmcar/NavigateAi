@@ -5,7 +5,7 @@ from sb3_contrib import MaskablePPO
 
 from navigate_game_custom_wrapper_mlp import NavigateEnv
 
-MODEL_PATH = r"trained_models_mlp/ppo_navigate_final"
+MODEL_PATH = r"releases/version1/trained_models_mlp/ppo_navigate_final"
 # MODEL_PATH = r"trained_models_mlp/ppo_navigate_1966080_steps.zip"
 
 NUM_EPISODE = 10
@@ -67,7 +67,7 @@ for episode in range(NUM_EPISODE):
             sum_step_reward += reward  # Accumulate step rewards.
 
         episode_reward += reward
-    
+
         if RENDER:
             env.render()
             time.sleep(FRAME_DELAY)

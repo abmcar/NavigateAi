@@ -63,10 +63,10 @@ def main():
     )
 
     # Set the save directory
-    save_dir = "trained_models_mlp"
+    save_dir = "/trained_models_mlp"
     os.makedirs(save_dir, exist_ok=True)
 
-    checkpoint_interval = 10240 # checkpoint_interval * num_envs = total_steps_per_checkpoint
+    checkpoint_interval = 10240  # checkpoint_interval * num_envs = total_steps_per_checkpoint
     checkpoint_callback = CheckpointCallback(save_freq=checkpoint_interval, save_path=save_dir,
                                              name_prefix="ppo_navigate")
 
@@ -77,7 +77,7 @@ def main():
     #     sys.stdout = log_file
 
     model.learn(
-        total_timesteps=int(512 * 16) * 800 ,
+        total_timesteps=int(512 * 16) * 6400,
         callback=[checkpoint_callback],
         use_masking=False
     )

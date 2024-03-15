@@ -14,7 +14,7 @@ class NavigateEnv(gym.Env):
         self.game = NavigateGame(seed=seed, board_size=board_size, silent_mode=silent_mode)
         self.game.reset()
 
-        self.action_space = gym.spaces.Discrete(4)  # 0: UP, 1: LEFT, 2: RIGHT, 3: DOWN
+        self.action_space = gym.spaces.Discrete(4)  # 0: UP, 1: DOWN, 2: LEFT, 3: RIGHT
 
         self.observation_space = gym.spaces.Box(
             low=-1, high=1,
@@ -31,7 +31,7 @@ class NavigateEnv(gym.Env):
         self.step_limit = 2048
         self.reward_step_counter = 0
         self.total_step = 0
-        self.path = list()
+        self.path = None
         self.total_reward = 0
         self.already_achieve = 1
 
@@ -46,7 +46,7 @@ class NavigateEnv(gym.Env):
         self.over_time = False
         self.reward_step_counter = 0
         self.total_step = 0
-        self.path = []
+        self.path = set()
         self.already_achieve = 0
 
         obs = self._generate_observation()
@@ -54,30 +54,30 @@ class NavigateEnv(gym.Env):
         return obs, info
 
     def step(self, action):
-        self.done, info = self.game.step(action)
+        self.done, info = self.game.step(action+1)
         obs = self._generate_observation()
 
         navigator = info["navigator_pos"]
         destination = info["destination_pos"]
+        reward = 0
+        # # 更新距离奖励，使用更敏感的距离衡量方法
+        # distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
+        # reward = math.sqrt(100 / max(1, distance))  # 奖励与距离负相关
 
-        # 更新距离奖励，使用更敏感的距离衡量方法
-        distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
-        reward = math.sqrt(100 / max(1, distance))  # 奖励与距离负相关
+        # # 减轻对重复路径的惩罚，允许一定程度的探索
+        # if navigator in self.path:
+        #     reward -= 10  # 适当减少惩罚
 
-        # 减轻对重复路径的惩罚，允许一定程度的探索
-        if navigator in self.path:
-            reward -= 10  # 适当减少惩罚
-
-        self.path.append(navigator)
+        # self.path.append(navigator)
         self.total_step += 1
         self.reward_step_counter += 1
 
         # 到达目的地的奖励，奖励与所需步数的倒数平方成正比，同时加入动态因子以鼓励连续成功
         if info["destination_arrived"]:
-            reward += 100 + 100 / max(1, self.reward_step_counter) * (self.already_achieve ** 0.6)
+            reward += 10 + 10 / max(1, self.reward_step_counter) * (self.already_achieve ** 0.6)
             self.already_achieve += 1
             self.reward_step_counter = 0
-            self.path = []
+            # self.path = set()
 
         # 处理步数限制导致的游戏结束
         if self.total_step > self.step_limit:
@@ -87,8 +87,7 @@ class NavigateEnv(gym.Env):
         elif self.done:
             # reward -= min(200 * (max(1, self.already_achieve) ** 1.15),
             #               200 * (1.15 ** max(1, self.already_achieve)))  # 碰撞或其他失败条件导致较大惩罚
-            reward -= 1000 - self.total_step
-
+            reward -= 1
         return obs, reward, self.done, self.over_time, info
 
     def render(self):
@@ -124,5 +123,7 @@ class NavigateEnv(gym.Env):
     def _generate_observation(self):
         obs = np.zeros((self.game.board_size, self.game.board_size), dtype=np.float32)
         obs[tuple(self.game.navigator)] = 1.0
-        obs[tuple(self.game.destination)] = -1.0
+        obs[tuple(self.game.destination)] = 100
+        for obstacle in self.game.obstacles:
+            obs[tuple(obstacle)] = -1.0
         return obs

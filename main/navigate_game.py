@@ -41,7 +41,6 @@ class NavigateGame:
             self.font = None
 
         self.navigator = None
-        self.obstacles = None
 
         self.direction = None
         self.score = 0
@@ -62,7 +61,6 @@ class NavigateGame:
         # 初始方向（下一步要走的方向）
         self.direction = "NONE"
         self.destination = self._generate_destination()
-        self.obstacles = self._generate_obstacles()
         self.score = 0
 
         destination_arrived = (self.navigator == self.destination)
@@ -89,7 +87,6 @@ class NavigateGame:
                 or row >= self.board_size
                 or col < 0
                 or col >= self.board_size
-                or (row, col) in self.obstacles
         )
 
         # 检查是否到达终点
@@ -114,10 +111,6 @@ class NavigateGame:
         }
         if destination_arrived:
             self.destination = self._generate_destination()
-            self.obstacles = self._generate_obstacles()
-            # done = destination_arrived
-            # if self.score >= 100:
-            #     done = True
 
         return done, info
 
@@ -128,24 +121,6 @@ class NavigateGame:
             row = random.randint(0, self.board_size - 1)
             col = random.randint(0, self.board_size - 1)
         return row, col
-
-    def _generate_obstacles(self, obstacle_count=None):
-        """
-        随机在游戏板上生成障碍物。
-        可以通过 obstacle_count 参数指定障碍物的数量，
-        如果没有指定，障碍物数量默认为板大小的 1/7。
-        """
-        obstacles = set()
-        if obstacle_count is None:
-            obstacle_count = self.board_size * self.board_size // 7  # 默认障碍物数量
-
-        while len(obstacles) < obstacle_count:
-            row = random.randint(0, self.board_size - 1)
-            col = random.randint(0, self.board_size - 1)
-            pos = (row, col)
-            if pos not in obstacles and pos != self.navigator and pos != self.destination:
-                obstacles.add(pos)
-        return obstacles
 
     def draw_score(self):
         score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
@@ -211,11 +186,7 @@ class NavigateGame:
         # Draw navigator
         self.draw_navigator()
 
-        # Draw obstacles
-        for row, col in self.obstacles:
-            pygame.draw.rect(self.screen, (50, 50, 50), (
-                col * self.cell_size + self.border_size, row * self.cell_size + self.border_size, self.cell_size,
-                self.cell_size))
+
 
         # Draw destination
         r, c = self.destination

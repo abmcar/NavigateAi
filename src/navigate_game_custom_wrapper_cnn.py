@@ -17,10 +17,10 @@ class NavigateEnv(gym.Env):
         self.action_space = gym.spaces.Discrete(4)  # 0: UP, 1: DOWN, 2: LEFT, 3: RIGHT
 
         self.observation_space = gym.spaces.Box(
-            low=-1, high=1,
-            shape=(self.game.board_size, self.game.board_size),
-            dtype=np.float32
-        )  # 0: empty,  1: navigator, -1: destination
+            low=0, high=255,
+            shape=(84, 84, 3),
+            dtype=np.uint8
+        )
 
         self.board_size = board_size
         self.grid_size = board_size ** 2
@@ -61,8 +61,8 @@ class NavigateEnv(gym.Env):
         destination = info["destination_pos"]
         reward = 0
         # # 更新距离奖励，使用更敏感的距离衡量方法
-        # distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
-        # reward = math.sqrt(100 / max(1, distance))  # 奖励与距离负相关
+        distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
+        reward = math.sqrt(3 / max(1, distance))  # 奖励与距离负相关
 
         # # 减轻对重复路径的惩罚，允许一定程度的探索
         # if navigator in self.path:
@@ -87,7 +87,7 @@ class NavigateEnv(gym.Env):
         elif self.done:
             # reward -= min(200 * (max(1, self.already_achieve) ** 1.15),
             #               200 * (1.15 ** max(1, self.already_achieve)))  # 碰撞或其他失败条件导致较大惩罚
-            reward -= 1
+            reward -= 10
         return obs, reward, self.done, self.over_time, info
 
     def render(self):
@@ -120,10 +120,78 @@ class NavigateEnv(gym.Env):
         else:
             return True
 
+    # def _generate_observation(self):
+    #     obs = np.zeros((self.game.board_size, self.game.board_size), dtype=np.float32)
+    #     obs[tuple(self.game.navigator)] = 1.0
+    #     obs[tuple(self.game.destination)] = 100
+    #     for obstacle in self.game.obstacles:
+    #         obs[tuple(obstacle)] = -1.0
+    #     return obs
+
     def _generate_observation(self):
-        obs = np.zeros((self.game.board_size, self.game.board_size), dtype=np.float32)
-        obs[tuple(self.game.navigator)] = 1.0
-        obs[tuple(self.game.destination)] = 100
+        obs = np.zeros((self.game.board_size, self.game.board_size), dtype=np.uint8)
+
+        # Stack single layer into 3-channel-image.
+        obs = np.stack((obs, obs, obs), axis=-1)
+
+        # Set the snake head to green and the tail to blue
+        obs[self.game.navigator] = [0, 255, 0]
+
         for obstacle in self.game.obstacles:
-            obs[tuple(obstacle)] = -1.0
+            obs[obstacle] = [255, 0, 0]
+
+        # Set the food to red
+        obs[self.game.destination] = [0, 0, 255]
+
+        # Enlarge the observation to 84x84
+        obs = np.repeat(np.repeat(obs, 7, axis=0), 7, axis=1)
+
         return obs
+
+# Test the environment using random actions
+# NUM_EPISODES = 100
+# RENDER_DELAY = 0.001
+# from matplotlib import pyplot as plt
+
+# if __name__ == "__main__":
+#     env = SnakeEnv(silent_mode=False)
+
+# # Test Init Efficiency
+# print(MODEL_PATH_S)
+# print(MODEL_PATH_L)
+# num_success = 0
+# for i in range(NUM_EPISODES):
+#     num_success += env.reset()
+# print(f"Success rate: {num_success/NUM_EPISODES}")
+
+# sum_reward = 0
+
+# # 0: UP, 1: LEFT, 2: RIGHT, 3: DOWN
+# action_list = [1, 1, 1, 0, 0, 0, 2, 2, 2, 3, 3, 3]
+
+# for _ in range(NUM_EPISODES):
+#     obs = env.reset()
+#     done = False
+#     i = 0
+#     while not done:
+#         plt.imshow(obs, interpolation='nearest')
+#         plt.show()
+#         action = env.action_space.sample()
+#         # action = action_list[i]
+#         i = (i + 1) % len(action_list)
+#         obs, reward, done, info = env.step(action)
+#         sum_reward += reward
+#         if np.absolute(reward) > 0.001:
+#             print(reward)
+#         env.render()
+
+#         time.sleep(RENDER_DELAY)
+#     # print(info["snake_length"])
+#     # print(info["food_pos"])
+#     # print(obs)
+#     print("sum_reward: %f" % sum_reward)
+#     print("episode done")
+#     # time.sleep(100)
+
+# env.close()
+# print("Average episode reward for random strategy: {}".format(sum_reward/NUM_EPISODES))

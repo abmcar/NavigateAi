@@ -33,9 +33,9 @@ class NavigateGame:
 
             # 加载音效
             mixer.init()
-            self.sound_eat = mixer.Sound("sound/eat.wav")
-            self.sound_game_over = mixer.Sound("sound/game_over.wav")
-            self.sound_victory = mixer.Sound("sound/victory.wav")
+            self.sound_eat = mixer.Sound("../resources/sound/eat.wav")
+            self.sound_game_over = mixer.Sound("../resources/sound/game_over.wav")
+            self.sound_victory = mixer.Sound("../resources/sound/victory.wav")
         else:
             self.screen = None
             self.font = None

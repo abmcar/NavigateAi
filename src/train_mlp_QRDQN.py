@@ -5,13 +5,13 @@ import random
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.env_util import make_vec_env
-from sb3_contrib import MaskablePPO
+from sb3_contrib import QRDQN
 from sb3_contrib.common.wrappers import ActionMasker
 
 from navigate_game_custom_wrapper_mlp import NavigateEnv
 
 NUM_ENV = 32
-LOG_DIR = "logs"
+LOG_DIR = "../output/logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
 from stable_baselines3.common.callbacks import BaseCallback
@@ -53,22 +53,22 @@ def main():
     # env = Monitor(env)
     # env.render()
 
-    model = MaskablePPO(
+    model = QRDQN(
         "MlpPolicy",
         env,
         # device="mps",
         verbose=1,
         # gamma=,
-        tensorboard_log=LOG_DIR
+        tensorboard_log=LOG_DIR + "/QRDQN",
     )
 
     # Set the save directory
-    save_dir = "./trained_models_mlp/PPO"
+    save_dir = "../output/trained_models_mlp/QRDQN"
     os.makedirs(save_dir, exist_ok=True)
 
     checkpoint_interval = 102400  # checkpoint_interval * num_envs = total_steps_per_checkpoint
     checkpoint_callback = CheckpointCallback(save_freq=checkpoint_interval, save_path=save_dir,
-                                             name_prefix="ppo_navigate")
+                                             name_prefix="qrdqn_navigate")
 
     # Writing the training logs from stdout to a file
     original_stdout = sys.stdout
@@ -77,9 +77,8 @@ def main():
     #     sys.stdout = log_file
 
     model.learn(
-        total_timesteps=int(512 * 16) * 6400,
+        total_timesteps=int(512 * 16) * 640,
         callback=[checkpoint_callback],
-        use_masking=False
     )
     env.close()
 
@@ -87,7 +86,7 @@ def main():
     # sys.stdout = original_stdout
 
     # Save the final model
-    model.save(os.path.join(save_dir, "ppo_navigate_final.zip"))
+    model.save(os.path.join(save_dir, "qrdqn_navigate_final.zip"))
 
 
 if __name__ == "__main__":

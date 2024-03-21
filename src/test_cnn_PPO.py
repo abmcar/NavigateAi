@@ -5,7 +5,7 @@ from sb3_contrib import MaskablePPO
 
 from navigate_game_custom_wrapper_mlp import NavigateEnv
 
-MODEL_PATH = r"releases/version1/trained_models_mlp/ppo_navigate_final"
+MODEL_PATH = r"../output/trained_models_cnn/PPO/ppo_navigate_final"
 # MODEL_PATH = r"trained_models_mlp/ppo_navigate_1966080_steps.zip"
 
 NUM_EPISODE = 10

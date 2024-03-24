@@ -3,7 +3,7 @@ import random
 
 from sb3_contrib import MaskablePPO
 
-from navigate_game_custom_wrapper_mlp import NavigateEnv
+from navigate_game_custom_wrapper_cnn import NavigateEnv
 
 MODEL_PATH = r"../output/trained_models_cnn/PPO/ppo_navigate_final"
 # MODEL_PATH = r"trained_models_mlp/ppo_navigate_1966080_steps.zip"

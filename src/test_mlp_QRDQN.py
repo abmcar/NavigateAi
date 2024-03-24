@@ -3,9 +3,9 @@ import random
 
 from sb3_contrib import QRDQN
 
-from navigate_game_custom_wrapper_mlp import NavigateEnv
+from navigate_game_custom_wrapper_mlp import NavigateEnvMlp as NavigateEnv
 
-MODEL_PATH = r"../output/trained_models_mlp/QRDQN/qrdqn_navigate_34406400_steps.zip"
+MODEL_PATH = r"../output/trained_models_mlp/QRDQN/qrdqn_navigate_final.zip"
 # MODEL_PATH = r"trained_models_mlp/ppo_navigate_1966080_steps.zip"
 
 NUM_EPISODE = 10

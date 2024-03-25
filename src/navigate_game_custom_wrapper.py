@@ -86,7 +86,7 @@ class NavigateEnv(gym.Env):
         # 新手保护期
         # if self.already_achieve <= 3:
         #     reward = max(reward, 0)
-        # return obs, reward, self.done, self.over_time, info
+        return obs, reward, self.done, self.over_time, info
 
     def render(self):
         self.game.render()

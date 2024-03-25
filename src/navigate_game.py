@@ -74,9 +74,8 @@ class NavigateGame:
         }
         return info
 
-    def step(self, action):
-        # 从键盘动作得到下一步的方向
-        self.direction = action
+    def step(self, step_action):
+        self.direction = step_action
 
         # 移动 Navigator 位置
         row, col = self.navigator

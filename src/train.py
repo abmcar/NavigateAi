@@ -15,11 +15,11 @@ LOG_DIR = "../output/logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
 
-def make_env(policy_type="MlpPolicy",seed=0):
+def make_env(policy_type="MlpPolicy", seed=0):
     def _init():
         if policy_type == "CnnPolicy":
             env = NavigateEnvCnn(seed=seed)
-            env = ActionMasker(env, NavigateEnvCnn.get_action_mask)
+            # env = ActionMasker(env, NavigateEnvCnn.get_action_mask)
         else:
             env = NavigateEnvMlp(seed=seed)
             env = ActionMasker(env, NavigateEnvMlp.get_action_mask)
@@ -82,6 +82,6 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 
 if __name__ == "__main__":
     # train("QRDQN", "MlpPolicy", "cpu", int(1e7))
-    train("QRDQN", "CnnPolicy", "cuda", int(1e7))
-    # train("PPO", "MlpPolicy", "cpu", int(1e7))
+    # train("QRDQN", "CnnPolicy", "cuda", int(1e7))
+    train("PPO", "MlpPolicy", "cpu", int(1e7))
     # train("PPO", "CnnPolicy", "cpu", int(1e7))

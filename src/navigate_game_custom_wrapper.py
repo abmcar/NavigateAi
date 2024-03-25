@@ -97,15 +97,9 @@ class NavigateEnv(gym.Env):
     # Check if the action is against the current direction of the navigator or is ending the game.
     def _check_action_validity(self, action):
         row, col = self.game.navigator
-        if action == 0:    # UP
-            row -= 1
-        elif action == 1:  # DOWN
-            col -= 1
-        elif action == 2:  # LEFT
-            col += 1
-        elif action == 3:  # RIGHT
-            row += 1
-
+        action = action + 1
+        row += self.game.next_row[action]
+        col += self.game.next_col[action]
         game_over = (
                 row < 0
                 or row >= self.board_size

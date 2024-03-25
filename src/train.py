@@ -7,17 +7,22 @@ from stable_baselines3.common.env_util import make_vec_env
 from sb3_contrib import QRDQN, MaskablePPO
 from sb3_contrib.common.wrappers import ActionMasker
 
-from navigate_game_custom_wrapper_mlp import NavigateEnvMlp as NavigateEnv
+from navigate_game_custom_wrapper_mlp import NavigateEnvMlp
+from navigate_game_custom_wrapper_cnn import NavigateEnvCnn
 
 NUM_ENV = 10
 LOG_DIR = "../output/logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
 
-def make_env(seed=0):
+def make_env(policy_type="MlpPolicy",seed=0):
     def _init():
-        env = NavigateEnv(seed=seed)
-        env = ActionMasker(env, NavigateEnv.get_action_mask)
+        if policy_type == "CnnPolicy":
+            env = NavigateEnvCnn(seed=seed)
+            env = ActionMasker(env, NavigateEnvCnn.get_action_mask)
+        else:
+            env = NavigateEnvMlp(seed=seed)
+            env = ActionMasker(env, NavigateEnvMlp.get_action_mask)
         env = Monitor(env)
         env.seed(seed)
         return env
@@ -26,7 +31,7 @@ def make_env(seed=0):
 
 
 def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: int = 10000000):
-    env = make_vec_env(make_env(), n_envs=NUM_ENV)
+    env = make_vec_env(make_env(policy_type), n_envs=NUM_ENV)
     if model_type == "QRDQN":
         model = QRDQN(
             policy=policy_type,
@@ -76,7 +81,7 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 
 
 if __name__ == "__main__":
-    train("QRDQN", "MlpPolicy", "cpu", int(1e7))
-    train("QRDQN", "CnnPolicy", "mps", int(1e7))
-    train("PPO", "MlpPolicy", "cpu", int(1e7))
-    train("PPO", "CnnPolicy", "cpu", int(1e7))
+    # train("QRDQN", "MlpPolicy", "cpu", int(1e7))
+    train("QRDQN", "CnnPolicy", "cuda", int(1e7))
+    # train("PPO", "MlpPolicy", "cpu", int(1e7))
+    # train("PPO", "CnnPolicy", "cpu", int(1e7))

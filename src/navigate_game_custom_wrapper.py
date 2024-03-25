@@ -60,16 +60,16 @@ class NavigateEnv(gym.Env):
 
         # # 减轻对重复路径的惩罚，允许一定程度的探索
         if navigator in self.path:
-            reward -= 1  # 适当减少惩罚
+            reward -= 2  # 适当减少惩罚
 
         self.path.add(navigator)
         self.total_step += 1
         self.reward_step_counter += 1
-
         # 到达目的地的奖励，奖励与所需步数的倒数平方成正比，同时加入动态因子以鼓励连续成功
         if info["destination_arrived"]:
             reward += 10 + 10 / max(1, self.reward_step_counter) * (self.already_achieve ** 0.6)
             self.already_achieve += 1
+            reward += 50 / self.already_achieve
             self.reward_step_counter = 0
             self.path = set()
 
@@ -82,7 +82,11 @@ class NavigateEnv(gym.Env):
             # reward -= min(200 * (max(1, self.already_achieve) ** 1.15),
             #               200 * (1.15 ** max(1, self.already_achieve)))  # 碰撞或其他失败条件导致较大惩罚
             reward -= 10
-        return obs, reward, self.done, self.over_time, info
+
+        # 新手保护期
+        # if self.already_achieve <= 3:
+        #     reward = max(reward, 0)
+        # return obs, reward, self.done, self.over_time, info
 
     def render(self):
         self.game.render()

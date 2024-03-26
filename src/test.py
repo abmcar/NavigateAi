@@ -17,7 +17,7 @@ ROUND_DELAY = 0.5
 def test(model_type, policy_type, render):
     seed = random.randint(0, 1e9)
     print(f"Using seed = {seed} for testing.")
-    MODEL_PATH = r"../output/trained_models_{}/{}/{}_navigate_final.zip".format(policy_type, model_type, model_type)
+    MODEL_PATH = r"../output/trained_models_{}/{}/{}_navigate_final".format(policy_type, model_type, model_type)
 
     if policy_type == 'CnnPolicy':
         env = NavigateEnvCnn(seed=seed, limit_step=False, silent_mode=render)
@@ -30,7 +30,7 @@ def test(model_type, policy_type, render):
     if model_type == 'QRDQN':
         model = QRDQN.load(MODEL_PATH)
     elif model_type == 'PPO':
-        model = MaskablePPO(MODEL_PATH)
+        model = MaskablePPO.load(MODEL_PATH)
     else:
         print("Model Type Error")
         return
@@ -99,4 +99,4 @@ def test(model_type, policy_type, render):
 
 
 if __name__ == '__main__':
-    test('QRDQN', 'CnnPolicy', not RENDER)
+    test('PPO', 'MlpPolicy', not RENDER)

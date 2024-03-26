@@ -19,7 +19,7 @@ def make_env(policy_type="MlpPolicy", seed=0):
     def _init():
         if policy_type == "CnnPolicy":
             env = NavigateEnvCnn(seed=seed)
-            # env = ActionMasker(env, NavigateEnvCnn.get_action_mask)
+            env = ActionMasker(env, NavigateEnvCnn.get_action_mask)
         else:
             env = NavigateEnvMlp(seed=seed)
             env = ActionMasker(env, NavigateEnvMlp.get_action_mask)
@@ -59,7 +59,7 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 
     checkpoint_interval = 100000  # checkpoint_interval * num_envs = total_steps_per_checkpoint
     checkpoint_callback = CheckpointCallback(save_freq=checkpoint_interval, save_path=save_dir,
-                                             name_prefix="qrdqn_navigate")
+                                             name_prefix="{}_navigate".format(model_type))
 
     # Writing the training logs from stdout to a file
     # original_stdout = sys.stdout
@@ -83,5 +83,5 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 if __name__ == "__main__":
     # train("QRDQN", "MlpPolicy", "cpu", int(1e7))
     # train("QRDQN", "CnnPolicy", "cuda", int(1e7))
-    train("PPO", "MlpPolicy", "cpu", int(1e7))
-    # train("PPO", "CnnPolicy", "cpu", int(1e7))
+    # train("PPO", "MlpPolicy", "cpu", int(1e7))
+    train("PPO", "CnnPolicy", "mps", int(1e7))

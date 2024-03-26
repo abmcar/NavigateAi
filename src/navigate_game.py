@@ -41,6 +41,7 @@ class NavigateGame:
             self.font = None
 
         self.navigator = None
+        self.prev_navigator = None
         self.obstacles = None
 
         self.direction = None
@@ -58,6 +59,7 @@ class NavigateGame:
     def reset(self):
         # 初始化开始位置为中心
         self.navigator = (self.board_size // 2, self.board_size // 2)
+        self.prev_navigator = self.navigator
 
         # 初始方向（下一步要走的方向）
         self.direction = "NONE"
@@ -68,6 +70,7 @@ class NavigateGame:
         destination_arrived = (self.navigator == self.destination)
 
         info = {
+            "prev_navigator_pos": self.prev_navigator,
             "navigator_pos": self.navigator,
             "destination_pos": self.destination,
             "destination_arrived": destination_arrived
@@ -78,9 +81,11 @@ class NavigateGame:
         self.direction = step_action
 
         # 移动 Navigator 位置
+        self.prev_navigator = self.navigator
         row, col = self.navigator
         row += self.next_row[self.direction]
         col += self.next_col[self.direction]
+
 
         # 检查是否撞墙
         done = (
@@ -107,6 +112,7 @@ class NavigateGame:
                 self.sound_game_over.play()
 
         info = {
+            "prev_navigator_pos": self.prev_navigator,
             "navigator_pos": self.navigator,
             "destination_pos": self.destination,
             "destination_arrived": destination_arrived

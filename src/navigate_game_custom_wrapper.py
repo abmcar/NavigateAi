@@ -52,15 +52,19 @@ class NavigateEnv(gym.Env):
         obs = self._generate_observation()
 
         navigator = info["navigator_pos"]
+        prev_navigator = info["prev_navigator_pos"]
         destination = info["destination_pos"]
         reward = 0
-        # # 更新距离奖励，使用更敏感的距离衡量方法
-        distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
-        reward = math.sqrt(3 / max(1, distance))  # 奖励与距离负相关
 
-        # # 减轻对重复路径的惩罚，允许一定程度的探索
+        distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
+        prev_distance = abs(destination[0] - prev_navigator[0]) + abs(destination[1] - prev_navigator[1])
+        if distance < prev_distance:
+            reward += 1
+        else:
+            reward -= 1
+
         if navigator in self.path:
-            reward -= 2  # 适当减少惩罚
+            reward -= 1
 
         self.path.add(navigator)
         self.total_step += 1

@@ -10,7 +10,7 @@ from sb3_contrib.common.wrappers import ActionMasker
 from navigate_game_custom_wrapper_mlp import NavigateEnvMlp
 from navigate_game_custom_wrapper_cnn import NavigateEnvCnn
 
-NUM_ENV = 10
+NUM_ENV = 32
 LOG_DIR = "../output/logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
@@ -47,7 +47,8 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
             env=env,
             device=devices,
             verbose=1,
-            # gamma=,
+            gamma=0.8,
+            learning_rate=0.2,
             tensorboard_log=LOG_DIR + "/{}".format(model_type),
         )
     else:
@@ -81,7 +82,7 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 
 
 if __name__ == "__main__":
-    train("QRDQN", "MlpPolicy", "cpu", int(1e7))
-    # train("QRDQN", "CnnPolicy", "cuda", int(1e7))
-    # train("PPO", "MlpPolicy", "cpu", int(1e7))
-    # train("PPO", "CnnPolicy", "mps", int(1e7))
+    train("QRDQN", "MlpPolicy", "cpu", int(2e7))
+    # train("QRDQN", "CnnPolicy", "mps", int(1e7))
+    train("PPO", "MlpPolicy", "cpu", int(2e7))
+    # train("PPO", "CnnPolicy", "mps", int(2e7))

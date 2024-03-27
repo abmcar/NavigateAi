@@ -63,10 +63,10 @@ class NavigateEnv(gym.Env):
         else:
             reward -= 1
 
-        if navigator in self.path:
-            reward -= 1
+        # if navigator in self.path:
+        #     reward -= 1
 
-        self.path.add(navigator)
+        # self.path.add(navigator)
         self.total_step += 1
         self.reward_step_counter += 1
         # 到达目的地的奖励，奖励与所需步数的倒数平方成正比，同时加入动态因子以鼓励连续成功
@@ -75,7 +75,7 @@ class NavigateEnv(gym.Env):
             self.already_achieve += 1
             reward += 50 / self.already_achieve
             self.reward_step_counter = 0
-            self.path = set()
+            # self.path = set()
 
         # 处理步数限制导致的游戏结束
         if self.total_step > self.step_limit:

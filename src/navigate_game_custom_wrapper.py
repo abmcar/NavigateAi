@@ -58,22 +58,22 @@ class NavigateEnv(gym.Env):
 
         distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
         prev_distance = abs(destination[0] - prev_navigator[0]) + abs(destination[1] - prev_navigator[1])
+
         if distance < prev_distance:
             reward += 1
         else:
-            reward -= 1
+            reward -= 1.5
 
         # if navigator in self.path:
         #     reward -= 1
 
         # self.path.add(navigator)
         self.total_step += 1
-        self.reward_step_counter += 1
-        # 到达目的地的奖励，奖励与所需步数的倒数平方成正比，同时加入动态因子以鼓励连续成功
+        # self.reward_step_counter += 1
+
         if info["destination_arrived"]:
-            reward += 10 + 10 / max(1, self.reward_step_counter) * (self.already_achieve ** 0.6)
+            reward += 100
             self.already_achieve += 1
-            reward += 50 / self.already_achieve
             self.reward_step_counter = 0
             # self.path = set()
 
@@ -83,13 +83,8 @@ class NavigateEnv(gym.Env):
 
         # 如果智能体撞墙或其他结束游戏的条件
         elif self.done:
-            # reward -= min(200 * (max(1, self.already_achieve) ** 1.15),
-            #               200 * (1.15 ** max(1, self.already_achieve)))  # 碰撞或其他失败条件导致较大惩罚
             reward -= 10
 
-        # 新手保护期
-        # if self.already_achieve <= 3:
-        #     reward = max(reward, 0)
         return obs, reward, self.done, self.over_time, info
 
     def render(self):

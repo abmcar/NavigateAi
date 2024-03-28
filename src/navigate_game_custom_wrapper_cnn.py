@@ -8,7 +8,7 @@ class NavigateEnvCnn(NavigateEnv):
         super().__init__(seed=seed, limit_step=limit_step, silent_mode=silent_mode)
         self.observation_space = gymnasium.spaces.Box(
             low=0, high=255,
-            shape=(84, 84, 3),
+            shape=(36, 36, 3),
             dtype=np.uint8
         )
 
@@ -23,5 +23,5 @@ class NavigateEnvCnn(NavigateEnv):
         # Set the food to red
         obs[self.game.destination] = [0, 0, 255]
         # Enlarge the observation to 84x84
-        obs = np.repeat(np.repeat(obs, 7, axis=0), 7, axis=1)
+        obs = np.repeat(np.repeat(obs, 3, axis=0), 3, axis=1)
         return obs

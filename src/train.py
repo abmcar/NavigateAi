@@ -37,7 +37,7 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
             policy=policy_type,
             env=env,
             device=devices,
-            verbose=1,
+            verbose=10,
             # gamma=,
             tensorboard_log=LOG_DIR + "/{}".format(model_type),
         )
@@ -46,9 +46,9 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
             policy=policy_type,
             env=env,
             device=devices,
-            verbose=1,
-            gamma=0.8,
-            learning_rate=0.2,
+            verbose=10,
+            gamma=0.99,
+            # learning_rate=0.2,
             tensorboard_log=LOG_DIR + "/{}".format(model_type),
         )
     else:
@@ -82,7 +82,7 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 
 
 if __name__ == "__main__":
-    train("QRDQN", "MlpPolicy", "cpu", int(2e7))
+    # train("QRDQN", "MlpPolicy", "cpu", int(2e7))
     # train("QRDQN", "CnnPolicy", "mps", int(1e7))
-    train("PPO", "MlpPolicy", "cpu", int(2e7))
-    # train("PPO", "CnnPolicy", "mps", int(2e7))
+    # train("PPO", "MlpPolicy", "cpu", int(2e7))
+    train("PPO", "CnnPolicy", "cuda", int(2e7))

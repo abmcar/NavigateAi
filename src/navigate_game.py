@@ -119,7 +119,7 @@ class NavigateGame:
         }
         if destination_arrived:
             self.destination = self._generate_destination()
-            self.obstacles = self._generate_obstacles()
+            # self.obstacles = self._generate_obstacles()
             # done = destination_arrived
             # if self.score >= 100:
             #     done = True

@@ -62,7 +62,8 @@ class NavigateEnv(gym.Env):
         if distance < prev_distance:
             reward += 1
         else:
-            reward -= 1.5
+            reward -= 2
+        reward += 2 / max(1, distance)
 
         # if navigator in self.path:
         #     reward -= 1
@@ -83,7 +84,11 @@ class NavigateEnv(gym.Env):
 
         # 如果智能体撞墙或其他结束游戏的条件
         elif self.done:
-            reward -= 10
+            reward -= 10 - self.already_achieve ** 1.1 * 10
+            reward += min(10, self.total_step ** 0.5)
+
+        if not self.game.silent_mode:
+            self.game.render()
 
         return obs, reward, self.done, self.over_time, info
 

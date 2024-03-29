@@ -99,4 +99,4 @@ def test(model_type, policy_type, render):
 
 
 if __name__ == '__main__':
-    test('PPO', 'MlpPolicy', not RENDER)
+    test('QRDQN', 'CnnPolicy', not RENDER)

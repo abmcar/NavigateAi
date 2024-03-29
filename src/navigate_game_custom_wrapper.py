@@ -22,7 +22,7 @@ class NavigateEnv(gym.Env):
         self.done = False
         self.over_time = False
 
-        self.step_limit = 2048
+        self.step_limit = 100
         self.reward_step_counter = 0
         self.total_step = 0
         self.path = None
@@ -30,8 +30,8 @@ class NavigateEnv(gym.Env):
         self.already_achieve = 1
 
     def seed(self, sed):
-        # self.game.seed(sed)
-        self.game.seed(random.randint(0, 1e9))
+        self.game.seed(sed)
+        # self.game.seed(random.randint(0, 1e9))
 
     def reset(self, seed=None, options=None):
         info = self.game.reset()
@@ -63,7 +63,7 @@ class NavigateEnv(gym.Env):
             reward += 1
         else:
             reward -= 2
-        reward += 2 / max(1, distance)
+        # reward += 2 / max(1, distance)
 
         # if navigator in self.path:
         #     reward -= 1
@@ -83,9 +83,11 @@ class NavigateEnv(gym.Env):
             self.over_time = True
 
         # 如果智能体撞墙或其他结束游戏的条件
-        elif self.done:
-            reward -= 10 - self.already_achieve ** 1.1 * 10
-            reward += min(10, self.total_step ** 0.5)
+        # elif self.done:
+        #     reward -= 10 - self.already_achieve ** 1.1 * 10
+        #     reward += min(10, self.total_step ** 0.5)
+
+        reward += self.total_step ** 0.01 - 1
 
         if not self.game.silent_mode:
             self.game.render()
@@ -112,6 +114,7 @@ class NavigateEnv(gym.Env):
                 or (row, col) in self.game.obstacles
         )
 
+        return True
         if game_over:
             return False
         else:

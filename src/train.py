@@ -32,7 +32,7 @@ def make_env(policy_type="MlpPolicy", seed=0, silent=True):
 
 
 def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: int = 10000000):
-    env = make_vec_env(make_env(policy_type), n_envs=NUM_ENV, seed=random.randint(0, int(1e9)))
+    env = make_vec_env(make_env(policy_type), n_envs=NUM_ENV,seed=random.randint(0, int(1e9)))
     # env = NavigateEnvCnn(seed=0, silent_mode=False)
     # env = ActionMasker(env, NavigateEnvMlp.get_action_mask)
     if model_type == "QRDQN":
@@ -41,7 +41,8 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
             env=env,
             device=devices,
             verbose=10,
-            # gamma=,
+            gamma=0.92,
+            batch_size=128,
             tensorboard_log=LOG_DIR + "/{}".format(model_type),
         )
     elif model_type == "PPO":
@@ -50,8 +51,9 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
             env=env,
             device=devices,
             verbose=10,
-            # gamma=0.8,
+            gamma=0.95,
             # learning_rate=0.2,
+            batch_size=128,
             tensorboard_log=LOG_DIR + "/{}".format(model_type),
         )
     else:
@@ -86,6 +88,6 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 
 if __name__ == "__main__":
     # train("QRDQN", "MlpPolicy", "cpu", int(2e7))
-    # train("QRDQN", "CnnPolicy", "mps", int(2e7))
+    train("QRDQN", "CnnPolicy", "cuda", int(1e8))
     # train("PPO", "MlpPolicy", "cpu", int(2e7))
-    train("PPO", "CnnPolicy", "mps", int(1e8))
+    # train("PPO", "CnnPolicy", "cuda", int(1e7))

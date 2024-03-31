@@ -88,6 +88,6 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 
 if __name__ == "__main__":
     # train("QRDQN", "MlpPolicy", "cpu", int(2e7))
-    train("QRDQN", "CnnPolicy", "cuda", int(1e8))
+    train("QRDQN", "CnnPolicy", "mps", int(1e8))
     # train("PPO", "MlpPolicy", "cpu", int(2e7))
     # train("PPO", "CnnPolicy", "cuda", int(1e7))

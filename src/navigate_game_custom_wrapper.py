@@ -22,7 +22,7 @@ class NavigateEnv(gym.Env):
         self.done = False
         self.over_time = False
 
-        self.step_limit = 100
+        self.step_limit = 500
         self.reward_step_counter = 0
         self.total_step = 0
         self.path = None
@@ -48,7 +48,7 @@ class NavigateEnv(gym.Env):
         return obs, info
 
     def step(self, action):
-        self.done, info = self.game.step(action+1)
+        self.done, info = self.game.step(action + 1)
         obs = self._generate_observation()
 
         navigator = info["navigator_pos"]
@@ -114,7 +114,7 @@ class NavigateEnv(gym.Env):
                 or (row, col) in self.game.obstacles
         )
 
-        return True
+        # return True
         if game_over:
             return False
         else:

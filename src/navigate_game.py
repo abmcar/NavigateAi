@@ -43,6 +43,7 @@ class NavigateGame:
         self.navigator = None
         self.prev_navigator = None
         self.obstacles = None
+        self.distance = None
 
         self.direction = None
         self.score = 0
@@ -65,6 +66,7 @@ class NavigateGame:
         self.direction = "NONE"
         self.destination = self._generate_destination()
         self.obstacles = self._generate_obstacles()
+        self.distance = self.calculate_distance()
         self.score = 0
 
         destination_arrived = (self.navigator == self.destination)
@@ -85,7 +87,6 @@ class NavigateGame:
         row, col = self.navigator
         row += self.next_row[self.direction]
         col += self.next_col[self.direction]
-
 
         # 检查是否撞墙
         done = (
@@ -151,6 +152,26 @@ class NavigateGame:
             if pos not in obstacles and pos != self.navigator and pos != self.destination:
                 obstacles.add(pos)
         return obstacles
+
+    def calculate_distance(self):
+        distance = [[int(1e9) for _ in range(self.board_size)] for _ in range(self.board_size)]
+        q = list()
+        q.append(self.destination)
+        distance[self.destination[0]][self.destination[1]] = 0
+        while len(q) > 0:
+            current_node = q.pop(0)
+            print(current_node)
+            for d in range(4):
+                nx = current_node[0] + self.next_col[d]
+                ny = current_node[1] + self.next_row[d]
+                if not (0 <= nx < self.board_size and 0 <= ny < self.board_size):
+                    continue
+                if (nx, ny) in self.obstacles:
+                    continue
+                if distance[nx][ny] > distance[current_node[0]][current_node[1]] + 1:
+                    distance[nx][ny] = distance[current_node[0]][current_node[1]] + 1
+                    q.append((nx, ny))
+        return distance
 
     def draw_score(self):
         score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))

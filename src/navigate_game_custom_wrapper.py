@@ -73,8 +73,8 @@ class NavigateEnv(gym.Env):
         # self.reward_step_counter += 1
 
         if info["destination_arrived"]:
-            reward += 100 * self.already_achieve ** 0.6
             self.already_achieve += 1
+            reward += 100 * self.already_achieve ** 0.6
             self.reward_step_counter = 0
             # self.path = set()
 

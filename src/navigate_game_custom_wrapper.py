@@ -60,6 +60,11 @@ class NavigateEnv(gym.Env):
         start_pos = info["start_pos"]
         destination = info["destination_pos"]
         reward = 0
+        self.total_step += 1
+
+        if self.total_step > self.step_limit :
+            self.over_time = True
+            return obs, reward, self.done, self.over_time, info
 
         distance_no_obstacles = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
         prev_distance_no_obstacles = abs(destination[0] - prev_navigator[0]) + abs(destination[1] - prev_navigator[1])

@@ -109,9 +109,8 @@ class NavigateGame:
         else:
             destination_arrived = False
 
-        if not done:
-            self.navigator = (row, col)
-        else:
+        self.navigator = (row, col)
+        if done:
             if not self.silent_mode:
                 self.sound_game_over.play()
 
@@ -164,7 +163,6 @@ class NavigateGame:
         distance[self.destination[0]][self.destination[1]] = 0
         while len(q) > 0:
             current_node = q.pop(0)
-            print(current_node)
             for d in range(4):
                 nx = current_node[0] + self.next_col[d]
                 ny = current_node[1] + self.next_row[d]

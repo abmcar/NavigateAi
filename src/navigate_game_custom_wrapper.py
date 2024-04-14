@@ -53,44 +53,31 @@ class NavigateEnv(gym.Env):
 
         navigator = info["navigator_pos"]
         prev_navigator = info["prev_navigator_pos"]
+        start_pos = info["start_pos"]
         destination = info["destination_pos"]
         reward = 0
 
-        distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
-        prev_distance = abs(destination[0] - prev_navigator[0]) + abs(destination[1] - prev_navigator[1])
+        distance_no_obstacles = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
+        prev_distance_no_obstacles = abs(destination[0] - prev_navigator[0]) + abs(destination[1] - prev_navigator[1])
+        distance_obstacles = self.game.distance[navigator[0]][navigator[1]]
+        prev_distance_obstacles = self.game.distance[prev_navigator[0]][prev_navigator[1]]
+        start_distance_obstacles = self.game.distance[start_pos[0]][start_pos[1]]
 
-        if distance < prev_distance:
-            reward += 1
+        reward_optimal = distance_obstacles - prev_distance_obstacles
+        reward_dis = math.exp(-(distance_obstacles / start_distance_obstacles))
+        reward_dis_no_obstacles = distance_no_obstacles - prev_distance_no_obstacles
+
+        if navigator in self.game.obstacles:
+            reward -= 4
+        elif navigator == destination:
+            reward += 10
         else:
-            reward -= 2
-        # reward += 2 / max(1, distance)
-
-        # if navigator in self.path:
-        #     reward -= 1
-
-        # self.path.add(navigator)
-        self.total_step += 1
-        # self.reward_step_counter += 1
-
-        if info["destination_arrived"]:
-            self.already_achieve += 1
-            reward += 100 * self.already_achieve ** 0.6
-            self.reward_step_counter = 0
-            # self.path = set()
-
-        # 处理步数限制导致的游戏结束
-        if self.total_step > self.step_limit:
-            self.over_time = True
-
-        # 如果智能体撞墙或其他结束游戏的条件
-        # elif self.done:
-        #     reward -= 10 - self.already_achieve ** 1.1 * 10
-        #     reward += min(10, self.total_step ** 0.5)
-
-        reward += self.total_step ** 0.01 - 1
+            reward = 0.8 * reward_optimal + 0.1 * reward_dis + 0.1 * reward_dis_no_obstacles
+            # print(reward_optimal, reward_dis, reward_dis_no_obstacles, reward)
 
         if not self.game.silent_mode:
             self.game.render()
+            # time.sleep(1)
 
         return obs, reward, self.done, self.over_time, info
 

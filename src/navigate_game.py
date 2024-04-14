@@ -44,6 +44,7 @@ class NavigateGame:
         self.prev_navigator = None
         self.obstacles = None
         self.distance = None
+        self.start_pos = None
 
         self.direction = None
         self.score = 0
@@ -61,6 +62,7 @@ class NavigateGame:
         # 初始化开始位置为中心
         self.navigator = (self.board_size // 2, self.board_size // 2)
         self.prev_navigator = self.navigator
+        self.start_pos = self.navigator
 
         # 初始方向（下一步要走的方向）
         self.direction = "NONE"
@@ -74,6 +76,7 @@ class NavigateGame:
         info = {
             "prev_navigator_pos": self.prev_navigator,
             "navigator_pos": self.navigator,
+            "start_pos": self.navigator,
             "destination_pos": self.destination,
             "destination_arrived": destination_arrived
         }
@@ -115,6 +118,7 @@ class NavigateGame:
         info = {
             "prev_navigator_pos": self.prev_navigator,
             "navigator_pos": self.navigator,
+            "start_pos": self.start_pos,
             "destination_pos": self.destination,
             "destination_arrived": destination_arrived
         }

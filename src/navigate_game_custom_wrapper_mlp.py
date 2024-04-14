@@ -14,7 +14,9 @@ class NavigateEnvMlp(NavigateEnv):
 
     def _generate_observation(self):
         obs = np.zeros((self.game.board_size, self.game.board_size), dtype=np.float32)
-        obs[tuple(self.game.navigator)] = 1.0
+        if (0 <= self.game.navigator[0] < 12 and
+            0 <= self.game.navigator[1] < 12):
+            obs[tuple(self.game.navigator)] = 1.0
         obs[tuple(self.game.destination)] = 100
         for obstacle in self.game.obstacles:
             obs[tuple(obstacle)] = -1.0

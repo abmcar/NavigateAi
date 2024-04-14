@@ -163,7 +163,7 @@ class NavigateGame:
         distance[self.destination[0]][self.destination[1]] = 0
         while len(q) > 0:
             current_node = q.pop(0)
-            for d in range(4):
+            for d in range(1,5):
                 nx = current_node[0] + self.next_col[d]
                 ny = current_node[1] + self.next_row[d]
                 if not (0 <= nx < self.board_size and 0 <= ny < self.board_size):

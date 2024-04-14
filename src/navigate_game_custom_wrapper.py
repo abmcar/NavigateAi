@@ -51,6 +51,10 @@ class NavigateEnv(gym.Env):
         self.done, info = self.game.step(action + 1)
         obs = self._generate_observation()
 
+        if self.done:
+            reward = -4
+            return obs, reward, self.done, self.over_time, info
+
         navigator = info["navigator_pos"]
         prev_navigator = info["prev_navigator_pos"]
         start_pos = info["start_pos"]
@@ -67,17 +71,13 @@ class NavigateEnv(gym.Env):
         reward_dis = math.exp(-(distance_obstacles / start_distance_obstacles))
         reward_dis_no_obstacles = distance_no_obstacles - prev_distance_no_obstacles
 
-        if navigator in self.game.obstacles:
-            reward -= 4
-        elif navigator == destination:
+        if navigator == destination:
             reward += 10
         else:
             reward = 0.8 * reward_optimal + 0.1 * reward_dis + 0.1 * reward_dis_no_obstacles
-            # print(reward_optimal, reward_dis, reward_dis_no_obstacles, reward)
 
         if not self.game.silent_mode:
             self.game.render()
-            # time.sleep(1)
 
         return obs, reward, self.done, self.over_time, info
 

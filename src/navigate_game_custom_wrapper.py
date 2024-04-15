@@ -77,7 +77,8 @@ class NavigateEnv(gym.Env):
         reward_dis_no_obstacles = distance_no_obstacles - prev_distance_no_obstacles
 
         if navigator == destination:
-            reward += 10
+            self.already_achieve += 1
+            reward += 10 ** self.already_achieve ** 0.5
         else:
             reward = 0.8 * reward_optimal + 0.1 * reward_dis + 0.1 * reward_dis_no_obstacles
 

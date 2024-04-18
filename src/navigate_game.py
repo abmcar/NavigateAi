@@ -42,7 +42,7 @@ class NavigateGame:
 
         self.navigator = None
         self.prev_navigator = None
-        self.obstacles = None
+        self.obstacles = list()
         self.distance = None
 
         self.direction = None
@@ -106,11 +106,10 @@ class NavigateGame:
         else:
             destination_arrived = False
 
-        if not done:
-            self.navigator = (row, col)
-        else:
-            if not self.silent_mode:
-                self.sound_game_over.play()
+        self.navigator = (row, col)
+
+        if done and not self.silent_mode:
+            self.sound_game_over.play()
 
         info = {
             "prev_navigator_pos": self.prev_navigator,
@@ -130,7 +129,7 @@ class NavigateGame:
     def _generate_destination(self) -> tuple:
         row = random.randint(0, self.board_size - 1)
         col = random.randint(0, self.board_size - 1)
-        while (row, col) == self.navigator:
+        while (row, col) == self.navigator or (row, col) in self.obstacles:
             row = random.randint(0, self.board_size - 1)
             col = random.randint(0, self.board_size - 1)
         return row, col
@@ -160,7 +159,7 @@ class NavigateGame:
         distance[self.destination[0]][self.destination[1]] = 0
         while len(q) > 0:
             current_node = q.pop(0)
-            print(current_node)
+            # print(current_node)
             for d in range(4):
                 nx = current_node[0] + self.next_col[d]
                 ny = current_node[1] + self.next_row[d]

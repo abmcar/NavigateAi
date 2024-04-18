@@ -62,7 +62,7 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
     save_dir = "../output/trained_models_{}/{}".format(policy_type, model_type)
     os.makedirs(save_dir, exist_ok=True)
 
-    checkpoint_interval = 100000  # checkpoint_interval * num_envs = total_steps_per_checkpoint
+    checkpoint_interval = 1000000  # checkpoint_interval * num_envs = total_steps_per_checkpoint
     checkpoint_callback = CheckpointCallback(save_freq=checkpoint_interval, save_path=save_dir,
                                              name_prefix="{}_navigate".format(model_type))
 
@@ -87,6 +87,6 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 
 if __name__ == "__main__":
     # train("QRDQN", "MlpPolicy", "cpu", int(2e7))
-    # train("QRDQN", "CnnPolicy", "mps", int(5e7))
+    train("QRDQN", "CnnPolicy", "cuda", int(1e8))
     # train("PPO", "MlpPolicy", "cpu", int(2e7))
-    train("PPO", "CnnPolicy", "mps", int(2e7))
+    # train("PPO", "CnnPolicy", "mps", int(2e7))

@@ -56,9 +56,8 @@ class NavigateEnv(gym.Env):
         destination = info["destination_pos"]
         reward = 0
 
-        distance = abs(destination[0] - navigator[0]) + abs(destination[1] - navigator[1])
-        prev_distance = abs(destination[0] - prev_navigator[0]) + abs(destination[1] - prev_navigator[1])
-
+        distance = self.game.distance[navigator[0]][navigator[1]]
+        prev_distance = self.game.distance[prev_navigator[0]][prev_navigator[1]]
         if distance < prev_distance:
             reward += 1
         else:

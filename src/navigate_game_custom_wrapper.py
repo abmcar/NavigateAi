@@ -51,6 +51,9 @@ class NavigateEnv(gym.Env):
         self.done, info = self.game.step(action + 1)
         obs = self._generate_observation()
 
+        if self.done:
+            return obs, 0, self.done, self.over_time, info
+
         navigator = info["navigator_pos"]
         prev_navigator = info["prev_navigator_pos"]
         destination = info["destination_pos"]

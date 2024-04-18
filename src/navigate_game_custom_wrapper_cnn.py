@@ -17,7 +17,8 @@ class NavigateEnvCnn(NavigateEnv):
         # Stack single layer into 3-channel-image.
         obs = np.stack((obs, obs, obs), axis=-1)
         # Set the snake head to green and the tail to blue
-        obs[self.game.navigator] = [0, 255, 0]
+        if 0 < self.game.navigator[0] < 12 and 0 < self.game.navigator[1] < 12:
+            obs[self.game.navigator] = [0, 255, 0]
         for obstacle in self.game.obstacles:
             obs[obstacle] = [255, 0, 0]
         # Set the food to red

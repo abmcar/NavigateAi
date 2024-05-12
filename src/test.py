@@ -18,6 +18,7 @@ def test(model_type, policy_type, render):
     seed = random.randint(0, 1e9)
     print(f"Using seed = {seed} for testing.")
     MODEL_PATH = r"../output/trained_models_{}/{}/{}_navigate_final".format(policy_type, model_type, model_type)
+    # MODEL_PATH = "../output/releases/version1-36m-1k+reward/trained_model.zip"
 
     if policy_type == 'CnnPolicy':
         env = NavigateEnvCnn(seed=seed, limit_step=False, silent_mode=render)
@@ -41,6 +42,10 @@ def test(model_type, policy_type, render):
     max_score = 0
 
     for episode in range(NUM_EPISODE):
+        if model_type == 'QRDQN':
+            model = QRDQN.load(MODEL_PATH)
+        elif model_type == 'PPO':
+            model = MaskablePPO.load(MODEL_PATH)
         obs, info = env.reset()
         episode_reward = 0
         done = False
@@ -68,7 +73,7 @@ def test(model_type, policy_type, render):
                 print(f"Gameover Penalty: {reward:.4f}. Last action: {last_action}")
             elif info["destination_arrived"]:
                 print(
-                    f"Food obtained at step {num_step:04d}. Food Reward: {reward:.4f}. Step Reward: {sum_step_reward:.4f}")
+                    f"Destination arrived at step {num_step:04d}. Destination Reward: {reward:.4f}. Step Reward: {sum_step_reward:.4f}")
                 sum_step_reward = 0  # Reset step reward accumulator.
             else:
                 sum_step_reward += reward  # Accumulate step rewards.

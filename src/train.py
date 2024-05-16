@@ -7,16 +7,18 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.env_util import make_vec_env
 from sb3_contrib import QRDQN, MaskablePPO, RecurrentPPO
 from sb3_contrib.common.wrappers import ActionMasker
+from stable_baselines3 import DQN
 
 from navigate_game_custom_wrapper_mlp import NavigateEnvMlp
 from navigate_game_custom_wrapper_cnn import NavigateEnvCnn
+from net import CustomNetwork
 
 NUM_ENV = 8
 LOG_DIR = "../output/logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
 
-def make_env(policy_type="MlpPolicy", seed=0, silent=True):
+def make_env(policy_type="MlpPolicy", seed=114514, silent=True):
     def _init():
         if policy_type == "CnnPolicy":
             env = NavigateEnvCnn(seed=seed, silent_mode=silent)
@@ -41,6 +43,16 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
             verbose=1,
             gamma=0.94,
             tensorboard_log=LOG_DIR + "/{}".format(model_type),
+        )
+    elif model_type == "DQN":
+        model = DQN(
+            policy=policy_type,
+            env=env,
+            device=devices,
+            verbose=1,
+            gamma=0.94,
+            tensorboard_log=LOG_DIR + "/{}".format(model_type),
+            policy_kwargs={"features_extractor_class": CustomNetwork, "features_extractor_kwargs": {"features_dim": 256}}
         )
     elif model_type == "PPO":
         model = MaskablePPO(
@@ -86,5 +98,6 @@ def train(model_type: str, policy_type: str, devices: str = 'cpu', total_steps: 
 if __name__ == "__main__":
     # train("QRDQN", "MlpPolicy", "mps", int(1e8))
     train("QRDQN",  "CnnPolicy", "mps", int(1e8))
+    # train("DQN",  "CnnPolicy", "mps", int(1e7))
     # train("PPO", "MlpPolicy", "mps", int(2e7))
     # train("PPO", "CnnPolicy", "mps", int(2e7))

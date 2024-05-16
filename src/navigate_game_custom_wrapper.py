@@ -28,6 +28,7 @@ class NavigateEnv(gym.Env):
         self.path = None
         self.total_reward = 0
         self.already_achieve = 1
+        self.seed_value = seed
 
     def seed(self, sed):
         self.game.seed(sed)
@@ -52,7 +53,7 @@ class NavigateEnv(gym.Env):
         obs = self._generate_observation()
 
         if self.done:
-            return obs, 0, self.done, self.over_time, info
+            return obs, -10, self.done, self.over_time, info
 
         navigator = info["navigator_pos"]
         prev_navigator = info["prev_navigator_pos"]
@@ -64,7 +65,7 @@ class NavigateEnv(gym.Env):
         if distance < prev_distance:
             reward += 1
         else:
-            reward -= 2
+            reward -= 1
         # reward += 2 / max(1, distance)
 
         # if navigator in self.path:
@@ -76,7 +77,7 @@ class NavigateEnv(gym.Env):
 
         if info["destination_arrived"]:
             self.already_achieve += 1
-            reward += 100 * self.already_achieve ** 0.6
+            reward += 50 * self.already_achieve ** 0.6
             self.reward_step_counter = 0
             # self.path = set()
 

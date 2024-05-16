@@ -3,22 +3,24 @@ import random
 
 from sb3_contrib import MaskablePPO
 from sb3_contrib import QRDQN
+from stable_baselines3 import DQN
 
 from navigate_game_custom_wrapper_cnn import NavigateEnvCnn
 from navigate_game_custom_wrapper_mlp import NavigateEnvMlp
 
-NUM_EPISODE = 10
+NUM_EPISODE = 100
 
-RENDER = True
+RENDER = False
 FRAME_DELAY = 0.01  # 0.01 fast, 0.05 slow
 ROUND_DELAY = 0.5
 
 
 def test(model_type, policy_type, render):
-    seed = random.randint(0, 1e9)
+    # seed = random.randint(0, 1e9)
+    seed = 0
     print(f"Using seed = {seed} for testing.")
     MODEL_PATH = r"../output/trained_models_{}/{}/{}_navigate_final".format(policy_type, model_type, model_type)
-    # MODEL_PATH = "../output/releases/version1-36m-1k+reward/trained_model.zip"
+    MODEL_PATH = "../output/trained_models_CnnPolicy/QRDQN/QRDQN_navigate_96000000_steps.zip"
 
     if policy_type == 'CnnPolicy':
         env = NavigateEnvCnn(seed=seed, limit_step=False, silent_mode=render)
@@ -32,6 +34,8 @@ def test(model_type, policy_type, render):
         model = QRDQN.load(MODEL_PATH)
     elif model_type == 'PPO':
         model = MaskablePPO.load(MODEL_PATH)
+    elif model_type == 'DQN':
+        model = DQN.load(MODEL_PATH)
     else:
         print("Model Type Error")
         return

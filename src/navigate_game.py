@@ -50,7 +50,7 @@ class NavigateGame:
         self.destination = None
         self.seed_value = seed
 
-        random.seed(seed)  # Set random seed.
+        random.seed(self.seed_value)  # Set random seed.
 
         self.reset()
 
@@ -58,6 +58,7 @@ class NavigateGame:
         random.seed(sed)  # Set random seed.
 
     def reset(self):
+        # self.seed(self.seed_value)
         # 初始化开始位置为中心
         self.navigator = (self.board_size // 2, self.board_size // 2)
         self.prev_navigator = self.navigator
@@ -295,6 +296,7 @@ if __name__ == "__main__":
     import time
 
     seed = random.randint(0, 1e9)
+    # seed = 0
     game = NavigateGame(seed=seed, silent_mode=False)
     pygame.init()
     game.screen = pygame.display.set_mode((game.display_width, game.display_height))
